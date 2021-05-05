@@ -14,6 +14,9 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from datetime import datetime as dt
+from datetime import timedelta as td
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -45,6 +48,10 @@ class Venue(db.Model):
     website_link = db.Column(db.String(120))
     seek_talent = db.Column(db.Boolean)
     description = db.Column(db.String(500))
+    shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<Venue {self.id} {self.description}>'
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -62,10 +69,26 @@ class Artist(db.Model):
     website_link = db.Column(db.String(120))
     seek_venue = db.Column(db.Boolean)
     description = db.Column(db.String(500))
+    shows = db.relationship('Show', backref='artist', lazy=True, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<Artist {self.id} {self.description}>'
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+
+class Show(db.Model):
+    __tablename__ = 'show'
+
+    id = db.Column(db.Integer, primary_key=True)
+    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'))
+    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
+    start_time = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f'<Show {self.id} {self.description}>'
+
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -79,6 +102,7 @@ def format_datetime(value, format='medium'):
       format="EE MM, dd, y h:mma"
   return babel.dates.format_datetime(date, format, locale='en')
 
+# registering filters in Jinja2: https://flask.palletsprojects.com/en/1.1.x/templating/#registering-filters
 app.jinja_env.filters['datetime'] = format_datetime
 
 #----------------------------------------------------------------------------#
