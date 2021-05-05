@@ -14,8 +14,6 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
-from datetime import datetime as dt
-from datetime import timedelta as td
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -46,8 +44,8 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     website_link = db.Column(db.String(120))
-    seek_talent = db.Column(db.Boolean)
-    description = db.Column(db.String(500))
+    seeking_talent = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -67,8 +65,8 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     website_link = db.Column(db.String(120))
-    seek_venue = db.Column(db.Boolean)
-    description = db.Column(db.String(500))
+    seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref='artist', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -254,6 +252,10 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
+  # error = False
+  # body = {}
+  # try:
+
   # TODO: modify data to be the data object returned from db insertion
 
   # on successful db insert, flash success
