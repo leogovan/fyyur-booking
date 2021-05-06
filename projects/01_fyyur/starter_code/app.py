@@ -5,7 +5,7 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify, abort
 # moment is used for date and time rendering
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -14,6 +14,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+import sys
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -49,7 +50,7 @@ class Venue(db.Model):
     shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<Venue {self.id} {self.description}>'
+        return f'<Venue {self.id} {self.name}>'
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -70,7 +71,7 @@ class Artist(db.Model):
     shows = db.relationship('Show', backref='artist', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<Artist {self.id} {self.description}>'
+        return f'<Artist {self.id} {self.name}>'
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -85,7 +86,7 @@ class Show(db.Model):
     start_time = db.Column(db.DateTime)
 
     def __repr__(self):
-        return f'<Show {self.id} {self.description}>'
+        return f'<Show {self.id} {self.name}>'
 
 
 #----------------------------------------------------------------------------#
@@ -252,9 +253,30 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
-  # error = False
-  # body = {}
-  # try:
+  error = False
+  body = {}
+  try:
+    name = request.form.get('name')
+    print("name", name)
+    venue = Venue(name=name)
+    print('Venue', venue)
+    db.session.add(venue)
+    db.session.flush()
+    venue_id = venue.id
+    db.session.commit()
+    body['name'] = venue.name
+    body['id'] = venue_id
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    abort(400)
+  else:
+    print('I am body before being returned to the view', body)
+    return jsonify(body)
 
   # TODO: modify data to be the data object returned from db insertion
 
