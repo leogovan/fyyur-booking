@@ -593,14 +593,41 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
-
-  # on successful db insert, flash success
-  flash('Show was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
+  # TODO: insert form data as a new Show record in the db, instead - DONE
+  error = False
+  body = {}
+  form = ShowForm(request.form)
+  try:
+    show = Show(
+      artist_id=form.artist_id.data,
+      venue_id=form.venue_id.data,
+      start_time=form.start_time.data
+    )
+    db.session.add(show)
+    db.session.flush()
+    show_id = show.id
+    db.session.commit()
+    body['id'] = show_id
+    body['artist_id'] = show.artist_id
+    body['venue_id'] = show.venue_id
+    body['start_time'] = show.start_time
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    flash('An error occurred. Show could not be listed.')
+    return render_template('pages/home.html')
+  else:
+    print('I am body before being returned to the view', body)
+  # on successful db insert, flash success - DONE
+    flash('Show was successfully listed!')
+  # TODO: on unsuccessful db insert, flash an error instead. - DONE
   # e.g., flash('An error occurred. Show could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+    return render_template('pages/home.html')
 
 @app.errorhandler(404)
 def not_found_error(error):
