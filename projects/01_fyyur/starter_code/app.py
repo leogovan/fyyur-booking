@@ -256,17 +256,31 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   error = False
   body = {}
+  form = VenueForm(request.form)
   try:
-    name = request.form.get('name')
-    print("name", name)
-    venue = Venue(name=name)
-    print('Venue', venue)
+    #name = request.form.get('name')
+    #print("name", name)
+    #venue = Venue(name=name)
+    #print('Venue', venue)
+    venue = Venue(
+      name=form.name.data,
+      city=form.city.data,
+      state=form.state.data,
+      address=form.address.data,
+      phone=form.phone.data,
+      genres=form.genres.data
+    )
     db.session.add(venue)
     db.session.flush()
     venue_id = venue.id
     db.session.commit()
-    body['name'] = venue.name
     body['id'] = venue_id
+    body['name'] = venue.name
+    body['city'] = venue.city
+    body['state'] = venue.state
+    body['address'] = venue.address
+    body['phone'] = venue.phone
+    body['genres'] = venue.genres
   except:
     error = True
     db.session.rollback()
