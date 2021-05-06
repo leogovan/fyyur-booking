@@ -258,17 +258,18 @@ def create_venue_submission():
   body = {}
   form = VenueForm(request.form)
   try:
-    #name = request.form.get('name')
-    #print("name", name)
-    #venue = Venue(name=name)
-    #print('Venue', venue)
     venue = Venue(
       name=form.name.data,
       city=form.city.data,
       state=form.state.data,
       address=form.address.data,
       phone=form.phone.data,
-      genres=form.genres.data
+      genres=form.genres.data,
+      facebook_link=form.facebook_link.data,
+      image_link=form.image_link.data,
+      website_link=form.website_link.data,
+      seeking_talent=form.seeking_talent.data,
+      seeking_description=form.seeking_description.data
     )
     db.session.add(venue)
     db.session.flush()
@@ -281,6 +282,10 @@ def create_venue_submission():
     body['address'] = venue.address
     body['phone'] = venue.phone
     body['genres'] = venue.genres
+    body['facebook_link'] = venue.facebook_link
+    body['image_link'] = venue.image_link
+    body['seeking_talent'] = venue.seeking_talent
+    body['seeking_description'] = venue.seeking_description
   except:
     error = True
     db.session.rollback()
