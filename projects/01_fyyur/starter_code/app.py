@@ -26,7 +26,7 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-# TODO: connect to a local postgresql database
+# TODO: connect to a local postgresql database - DONE
 migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
@@ -51,7 +51,7 @@ class Venue(db.Model):
     shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<Venue {self.id} {self.name}>'
+        return f'<Venue {self.id}, {self.name}, {self.city}, {self.state}, {self.address}, {self.phone}, {self.genres}> '
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -119,29 +119,56 @@ def index():
 
 @app.route('/venues')
 def venues():
-  # TODO: replace with real venues data.
-  #       num_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  # TODO: replace with real venues data. - DONE
+  #       num_shows should be aggregated based on number of upcoming shows per venue. - DONE
+  # SELECT the list of venues DISTINCT ON city and state
+  areas = Venue.query.distinct(Venue.city, Venue.state).order_by('state').all()
+  # empty list to store the output to the view
+  data = []
+  # loop through the query result
+  for area in areas:
+    # filter for venues WHERE state == area.state AND city == area.city
+    venue_filter = Venue.query.filter_by(state=area.state).filter_by(city=area.city).order_by('name').all()
+    # empty list to store the venue dictionary ready to be appended into the data list variable
+    venue_data = []
+    # I think data.append is setting the key/value from each list-type 'area' iterable in the for loop
+    # 'venues' value is initialised to the venue_data empty list, but gets appeneded in the nested loop
+    data.append({
+        'city':area.city,
+        'state':area.state,
+        'venues':venue_data
+      })
+    # nested loop goes through the venue_filter and appends the venue_data dictionary details
+    for venue in venue_filter:
+      venue_data.append({
+        'id':venue.id,
+        'name':venue.name,
+        # this filter returns a number of records in a list, but we can use len() as a way to count the number of items in that list
+        'num_upcoming_shows': len(Show.query.filter(Show.venue_id==venue.id).filter(Show.start_time>datetime.now()).all())
+      })
+  return render_template('pages/venues.html', areas=data)
+
+  # data=[{
+  #   "city": "San Francisco",
+  #   "state": "CA",
+  #   "venues": [{
+  #     "id": 1,
+  #     "name": "The Musical Hop",
+  #     "num_upcoming_shows": 0,
+  #   }, {
+  #     "id": 3,
+  #     "name": "Park Square Live Music & Coffee",
+  #     "num_upcoming_shows": 1,
+  #   }]
+  # }, {
+  #   "city": "New York",
+  #   "state": "NY",
+  #   "venues": [{
+  #     "id": 2,
+  #     "name": "The Dueling Pianos Bar",
+  #     "num_upcoming_shows": 0,
+  #   }]
+  # }]
   return render_template('pages/venues.html', areas=data)
 
 @app.route('/venues/search', methods=['POST'])
@@ -319,16 +346,17 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   # TODO: replace with real data returned from querying the database
-  data=[{
-    "id": 4,
-    "name": "Guns N Petals",
-  }, {
-    "id": 5,
-    "name": "Matt Quevedo",
-  }, {
-    "id": 6,
-    "name": "The Wild Sax Band",
-  }]
+  
+  # data=[{
+  #   "id": 4,
+  #   "name": "Guns N Petals",
+  # }, {
+  #   "id": 5,
+  #   "name": "Matt Quevedo",
+  # }, {
+  #   "id": 6,
+  #   "name": "The Wild Sax Band",
+  # }]
   return render_template('pages/artists.html', artists=data)
 
 @app.route('/artists/search', methods=['POST'])
