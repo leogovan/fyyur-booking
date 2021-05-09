@@ -253,7 +253,9 @@ def show_venue(venue_id):
     "seeking_description": venue.seeking_description,
     "image_link": venue.image_link,
     "upcoming_shows": upcoming_show_data,
-    "past_shows": past_show_data
+    "past_shows": past_show_data,
+    "past_shows_count": len(past_show_data),
+    "upcoming_shows_count": len(upcoming_show_data)
   }
 
   # data1={
