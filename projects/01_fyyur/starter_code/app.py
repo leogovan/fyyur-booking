@@ -206,6 +206,7 @@ def show_venue(venue_id):
       filter(Show.venue_id==venue_id).\
         filter(Show.start_time<datetime.now()).\
           all()
+  print("past_shows: ", type(past_shows[0]))
   past_show_data = []
   for show in past_shows:
     past_show_data.append({
