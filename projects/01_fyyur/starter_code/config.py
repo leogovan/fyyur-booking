@@ -12,3 +12,5 @@ DEBUG = True
 # TODO IMPLEMENT DATABASE URL
 SQLALCHEMY_DATABASE_URI = 'postgresql://leogovan@localhost:5432/fyyur'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+# This config will echo out executed SQL statements to the terminal
+#SQLALCHEMY_ECHO = True
