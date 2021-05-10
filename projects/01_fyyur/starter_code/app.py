@@ -439,14 +439,34 @@ def search_artists():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
+  name_search = request.form["search_term"]
+  search = "%{}%".format(name_search)
+  search_artist = db.session.query(
+    Artist.id,
+    Artist.name).\
+      filter(Artist.name.ilike(search)).\
+        all()
+  
+  artist_data = []
+  for artist in search_artist:
+    artist_data.append({
+      "id": artist.id,
+      "name": artist.name
+    })
+
+  response = {
+    "count": len(search_artist),
+    "data": artist_data
   }
+
+  # response={
+  #   "count": 1,
+  #   "data": [{
+  #     "id": 4,
+  #     "name": "Guns N Petals",
+  #     "num_upcoming_shows": 0,
+  #   }]
+  # }
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
@@ -608,7 +628,7 @@ def edit_artist(artist_id):
   #   "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
   #   "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
   # }
-  # TODO: populate form with fields from artist with ID <artist_id>
+  # TODO: populate form with fields from artist with ID <artist_id> - DONE
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -636,7 +656,7 @@ def edit_venue(venue_id):
   #   "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
   #   "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
   # }
-  # TODO: populate form with values from venue with ID <venue_id>
+  # TODO: populate form with values from venue with ID <venue_id> - DONE
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -656,7 +676,7 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
+  # TODO: insert form data as a new Venue record in the db, instead - DONE
   # TODO: modify data to be the data object returned from db insertion
   error = False
   body = {}
