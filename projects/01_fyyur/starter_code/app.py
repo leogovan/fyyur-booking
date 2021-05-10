@@ -363,7 +363,7 @@ def show_artist(artist_id):
     })
 
 
-  # Venue Data ----------------------------------------- #
+  # Artist Data ----------------------------------------- #
   data = {
     "id": artist_id,
     "name": artist.name,
@@ -394,10 +394,35 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-  # TODO: take values from the form submitted, and update existing - NOT DONE
+  # TODO: take values from the form submitted, and update existing - DONE
   # artist record with ID <artist_id> using the new attributes
-
-  return redirect(url_for('show_artist', artist_id=artist_id))
+  error = False
+  form = ArtistForm(request.form)
+  try:
+    artist = Artist.query.get(artist_id)
+    artist.name = form.name.data
+    artist.city = form.city.data
+    artist.state = form.state.data
+    artist.phone = form.phone.data
+    artist.genres = form.genres.data
+    artist.facebook_link = form.facebook_link.data
+    artist.image_link = form.image_link.data
+    artist.website_link = form.website_link.data
+    artist.seeking_venue = form.seeking_venue.data
+    artist.seeking_description = form.seeking_description.data
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    flash('An error occurred. Artist ' + form.name.data + ' could not be updated.')
+    return render_template('pages/home.html')
+  else:
+    flash('Artist ' + request.form['name'] + ' was successfully updated!')
+    return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
